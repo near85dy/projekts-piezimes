@@ -24,6 +24,10 @@ public class UserService implements IService {
         this.database = new Database(dbPath);
     }
 
+    protected Database getDatabase() {
+        return database;
+    }
+
     public void initialize() throws IOException {
         List<String[]> dbUsers = database.loadDatabase();
 

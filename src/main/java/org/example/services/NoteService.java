@@ -25,6 +25,10 @@ public class NoteService implements IService
         this.userService = userService;
     }
 
+    protected Database getDatabase() {
+        return database;
+    }
+
     public void initialize() throws IOException {
         List<String[]> dbNotes = database.loadDatabase();
 
@@ -65,10 +69,8 @@ public class NoteService implements IService
         newNote.created_at = currentTime;
         newNote.updated_at = currentTime;
 
-        // Add to memory
         notes.add(newNote);
 
-        // Save to CSV
         String[] noteData = {
             String.valueOf(newNote.id),
             String.valueOf(newNote.user_id),

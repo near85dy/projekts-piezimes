@@ -1,3 +1,6 @@
 id,email,name,surname,password,age
 1,admin@example.com,Admin,User,admin123,25
 2,blame.le77@gmail.com,Kirills,Breznevs,123456,18
+3,user1@example.com,New,User,pass123,35
+4,newuser@example.com,New,User,pass123,35
+5,test@example.com,New,User,pass123,35
