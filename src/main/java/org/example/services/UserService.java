@@ -115,4 +115,16 @@ public class UserService implements IService {
     public boolean isLoggedIn() {
         return currentUser != null;
     }
+
+    public int getTotalUsers() {
+        return users.size();
+    }
+
+    public double getAverageUserAge() {
+        if (users.isEmpty()) return 0;
+        return users.stream()
+                .mapToInt(user -> user.age)
+                .average()
+                .orElse(0);
+    }
 }

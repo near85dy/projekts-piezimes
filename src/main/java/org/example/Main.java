@@ -47,7 +47,8 @@ public class Main {
                 System.out.println("\n=== Welcome to Notes App ===");
                 System.out.println("1. Login");
                 System.out.println("2. Register");
-                System.out.println("3. Exit");
+                System.out.println("3. View Statistics");
+                System.out.println("4. Exit");
                 System.out.print("Choose option: ");
 
                 int choice = scanner.nextInt();
@@ -62,6 +63,9 @@ public class Main {
                         register();
                         break;
                     case 3:
+                        displayStatistics();
+                        break;
+                    case 4:
                         System.out.println("Goodbye!");
                         return;
                     default:
@@ -185,18 +189,61 @@ public class Main {
     }
 
     private static void viewNotes() {
-        List<NoteModel> notes = noteService.getCurrentUserNotes();
-        if (notes.isEmpty()) {
-            System.out.println("You don't have any notes yet!");
-        } else {
-            System.out.println("\nYour Notes:");
-            for (NoteModel note : notes) {
-                System.out.println("----------------------------------------");
-                System.out.println(note);
+        while (true) {
+            clearConsole();
+            System.out.println("\n=== View Notes ===");
+            System.out.println("1. View All Notes");
+            System.out.println("2. Sort by Title (A-Z)");
+            System.out.println("3. Sort by Title (Z-A)");
+            System.out.println("4. Sort by Last Update (Newest First)");
+            System.out.println("5. Sort by Last Update (Oldest First)");
+            System.out.println("6. Back to Main Menu");
+            System.out.print("Choose option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            clearConsole();
+
+            List<NoteModel> notes;
+            switch (choice) {
+                case 1:
+                    notes = noteService.getCurrentUserNotes();
+                    break;
+                case 2:
+                    notes = noteService.getNotesSortedByTitle(true);
+                    break;
+                case 3:
+                    notes = noteService.getNotesSortedByTitle(false);
+                    break;
+                case 4:
+                    notes = noteService.getNotesSortedByLastUpdate(false);
+                    break;
+                case 5:
+                    notes = noteService.getNotesSortedByLastUpdate(true);
+                    break;
+                case 6:
+                    return;
+                default:
+                    System.out.println("Invalid option!");
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue;
             }
+
+            if (notes.isEmpty()) {
+                System.out.println("You don't have any notes yet!");
+            } else {
+                System.out.println("\nYour Notes:");
+                for (NoteModel note : notes) {
+                    System.out.println(note);
+                }
+            }
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
         }
-        System.out.println("\nPress Enter to continue...");
-        scanner.nextLine();
     }
 
     private static void createNote() {
@@ -231,5 +278,25 @@ public class Main {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    private static void displayStatistics() {
+        clearConsole();
+        System.out.println("\n=== Application Statistics ===");
+        System.out.println("╔════════════════════════════════════════════════════════════╗");
+        System.out.println("║ User Statistics:                                           ║");
+        System.out.printf("║ Total Users: %-45d ║\n", userService.getTotalUsers());
+        System.out.printf("║ Average User Age: %-40.1f ║\n", userService.getAverageUserAge());
+        System.out.println("╠════════════════════════════════════════════════════════════╣");
+        System.out.println("║ Note Statistics:                                           ║");
+        System.out.printf("║ Total Notes: %-46d ║\n", noteService.getTotalNotes());
+        System.out.printf("║ Average Note Length: %-38.1f ║\n", noteService.getAverageNoteLength());
+        System.out.printf("║ Most Recent Note Date: %-35s ║\n", noteService.getMostRecentNoteDate());
+        if (userService.isLoggedIn()) {
+            System.out.printf("║ Your Notes: %-48d ║\n", noteService.getTotalNotesForCurrentUser());
+        }
+        System.out.println("╚════════════════════════════════════════════════════════════╝");
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
     }
 }

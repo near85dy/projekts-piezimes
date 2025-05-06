@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,28 @@ public class NoteService implements IService
                 .collect(Collectors.toList());
     }
 
+    public List<NoteModel> getNotesSortedByTitle(boolean ascending) {
+        List<NoteModel> userNotes = getCurrentUserNotes();
+        Comparator<NoteModel> comparator = Comparator.comparing(note -> note.title.toLowerCase());
+        if (!ascending) {
+            comparator = comparator.reversed();
+        }
+        return userNotes.stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
+    }
+
+    public List<NoteModel> getNotesSortedByLastUpdate(boolean ascending) {
+        List<NoteModel> userNotes = getCurrentUserNotes();
+        Comparator<NoteModel> comparator = Comparator.comparing(note -> note.updated_at);
+        if (!ascending) {
+            comparator = comparator.reversed();
+        }
+        return userNotes.stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
+    }
+
     public NoteModel createNote(String title, String content) throws IOException {
         if (!userService.isLoggedIn()) {
             return null;
@@ -85,4 +108,31 @@ public class NoteService implements IService
     }
 
     public void destroy() {}
+
+    public int getTotalNotes() {
+        return notes.size();
+    }
+
+    public int getTotalNotesForCurrentUser() {
+        if (!userService.isLoggedIn()) return 0;
+        return (int) notes.stream()
+                .filter(note -> note.user_id == userService.getCurrentUser().id)
+                .count();
+    }
+
+    public double getAverageNoteLength() {
+        if (notes.isEmpty()) return 0;
+        return notes.stream()
+                .mapToInt(note -> note.content.length())
+                .average()
+                .orElse(0);
+    }
+
+    public String getMostRecentNoteDate() {
+        if (notes.isEmpty()) return "No notes yet";
+        return notes.stream()
+                .max(Comparator.comparing(note -> note.updated_at))
+                .map(note -> note.updated_at)
+                .orElse("No notes yet");
+    }
 }
