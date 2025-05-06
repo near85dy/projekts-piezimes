@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class NoteService implements IService
@@ -134,5 +135,39 @@ public class NoteService implements IService
                 .max(Comparator.comparing(note -> note.updated_at))
                 .map(note -> note.updated_at)
                 .orElse("No notes yet");
+    }
+
+    public NoteModel updateNote(int noteId, String newTitle, String newContent) throws IOException {
+        if (!userService.isLoggedIn()) {
+            return null;
+        }
+
+        Optional<NoteModel> noteToUpdate = notes.stream()
+                .filter(note -> note.id == noteId && note.user_id == userService.getCurrentUser().id)
+                .findFirst();
+
+        if (noteToUpdate.isEmpty()) {
+            return null;
+        }
+
+        NoteModel note = noteToUpdate.get();
+        note.title = newTitle;
+        note.content = newContent;
+        note.updated_at = LocalDateTime.now().format(DATE_FORMATTER);
+
+        // Update the note in the database
+        List<String[]> allNotes = database.loadDatabase();
+        for (int i = 1; i < allNotes.size(); i++) {
+            String[] noteData = allNotes.get(i);
+            if (Integer.parseInt(noteData[0]) == noteId) {
+                noteData[2] = newTitle;
+                noteData[3] = newContent;
+                noteData[5] = note.updated_at;
+                break;
+            }
+        }
+        database.saveDatabase();
+
+        return note;
     }
 }

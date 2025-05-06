@@ -15,7 +15,6 @@ public class Database
 
     public Database(String path)
     {
-        // Convert resource URL to actual file path
         if (path.startsWith("file:/")) {
             path = path.substring(6);
         }
@@ -23,10 +22,8 @@ public class Database
         this.cachedData = new ArrayList<>();
         
         try {
-            // Ensure the file exists
             File file = new File(FILE_PATH);
             if (!file.exists()) {
-                // Create parent directories if they don't exist
                 file.getParentFile().mkdirs();
                 file.createNewFile();
             }
@@ -38,7 +35,7 @@ public class Database
     }
 
     public List<String[]> loadDatabase() throws IOException {
-        System.out.println("Loading database from: " + FILE_PATH); // Debug line
+        System.out.println("Loading database from: " + FILE_PATH);
         cachedData.clear();
         File file = new File(FILE_PATH);
         if (!file.exists()) {
@@ -56,9 +53,8 @@ public class Database
     }
 
     public void saveDatabase() throws IOException {
-        System.out.println("Saving database to: " + FILE_PATH); // Debug line
+        System.out.println("Saving database to: " + FILE_PATH); 
         File file = new File(FILE_PATH);
-        // Ensure parent directories exist
         file.getParentFile().mkdirs();
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -70,7 +66,6 @@ public class Database
         }
     }
 
-    // Display all rows
     public void displayAll() throws IOException {
         List<String[]> rows = loadDatabase();
         for (String[] row : rows) {

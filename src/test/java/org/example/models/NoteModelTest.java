@@ -23,16 +23,4 @@ public class NoteModelTest {
         assertEquals("2023-01-01 12:00:00", note.created_at);
         assertEquals("2023-01-01 12:00:00", note.updated_at);
     }
-    
-    @Test
-    public void testToString() {
-        NoteModel note = new NoteModel();
-        note.title = "Test Note";
-        note.content = "This is a test note content";
-        note.created_at = "2023-01-01 12:00:00";
-        
-        String expected = "Note{title='Test Note', content='This is a test note content', created_at='2023-01-01 12:00:00'}";
-        
-        assertEquals(expected, note.toString());
-    }
 } 

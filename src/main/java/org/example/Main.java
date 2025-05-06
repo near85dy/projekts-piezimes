@@ -7,6 +7,7 @@ import org.example.services.UserService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Main {
@@ -153,7 +154,8 @@ public class Main {
             System.out.println("\n=== Notes Menu ===");
             System.out.println("1. View My Notes");
             System.out.println("2. Create New Note");
-            System.out.println("3. Logout");
+            System.out.println("3. Update Profile");
+            System.out.println("4. Logout");
             System.out.print("Choose option: ");
 
             int choice = scanner.nextInt();
@@ -168,6 +170,9 @@ public class Main {
                     createNote();
                     break;
                 case 3:
+                    updateProfile();
+                    break;
+                case 4:
                     userService.destroy();
                     noteService.destroy();
                     System.out.println("Logged out successfully!");
@@ -180,12 +185,64 @@ public class Main {
                 default:
                     System.out.println("Invalid option!");
                     try {
-                        Thread.sleep(1500); // Show error message for 1.5 seconds
+                        Thread.sleep(1500);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
             }
         }
+    }
+
+    private static void updateProfile() {
+        UserModel currentUser = userService.getCurrentUser();
+        System.out.println("\n=== Update Profile ===");
+        System.out.println("Current Profile Information:");
+        System.out.println("Name: " + currentUser.name);
+        System.out.println("Surname: " + currentUser.surname);
+        System.out.println("Age: " + currentUser.age);
+        
+        System.out.print("\nEnter new name (press Enter to keep current): ");
+        String newName = scanner.nextLine();
+        if (newName.isEmpty()) {
+            newName = currentUser.name;
+        }
+        
+        System.out.print("Enter new surname (press Enter to keep current): ");
+        String newSurname = scanner.nextLine();
+        if (newSurname.isEmpty()) {
+            newSurname = currentUser.surname;
+        }
+        
+        System.out.print("Enter new password (press Enter to keep current): ");
+        String newPassword = scanner.nextLine();
+        if (newPassword.isEmpty()) {
+            newPassword = currentUser.password;
+        }
+        
+        System.out.print("Enter new age (press Enter to keep current): ");
+        String ageInput = scanner.nextLine();
+        int newAge = currentUser.age;
+        if (!ageInput.isEmpty()) {
+            try {
+                newAge = Integer.parseInt(ageInput);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid age format. Keeping current age.");
+            }
+        }
+        
+        try {
+            UserModel updatedUser = userService.updateUserProfile(newName, newSurname, newPassword, newAge);
+            System.out.println("\nProfile updated successfully!");
+            System.out.println("Updated Profile Information:");
+            System.out.println("Name: " + updatedUser.name);
+            System.out.println("Surname: " + updatedUser.surname);
+            System.out.println("Age: " + updatedUser.age);
+        } catch (IOException e) {
+            System.out.println("Error updating profile: " + e.getMessage());
+        }
+        
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
     }
 
     private static void viewNotes() {
@@ -197,7 +254,8 @@ public class Main {
             System.out.println("3. Sort by Title (Z-A)");
             System.out.println("4. Sort by Last Update (Newest First)");
             System.out.println("5. Sort by Last Update (Oldest First)");
-            System.out.println("6. Back to Main Menu");
+            System.out.println("6. Update Note");
+            System.out.println("7. Back to Main Menu");
             System.out.print("Choose option: ");
 
             int choice = scanner.nextInt();
@@ -222,6 +280,9 @@ public class Main {
                     notes = noteService.getNotesSortedByLastUpdate(true);
                     break;
                 case 6:
+                    updateNote();
+                    continue;
+                case 7:
                     return;
                 default:
                     System.out.println("Invalid option!");
@@ -244,6 +305,71 @@ public class Main {
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
         }
+    }
+
+    private static void updateNote() {
+        List<NoteModel> notes = noteService.getCurrentUserNotes();
+        if (notes.isEmpty()) {
+            System.out.println("You don't have any notes to update!");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        System.out.println("\n=== Update Note ===");
+        System.out.println("Your Notes:");
+        for (NoteModel note : notes) {
+            System.out.println("ID: " + note.id + " - " + note.title);
+        }
+
+        System.out.print("\nEnter the ID of the note you want to update: ");
+        int noteId;
+        try {
+            noteId = scanner.nextInt();
+            scanner.nextLine();
+        } catch (Exception e) {
+            System.out.println("Invalid note ID!");
+            scanner.nextLine();
+            return;
+        }
+
+        Optional<NoteModel> noteToUpdate = notes.stream()
+                .filter(note -> note.id == noteId)
+                .findFirst();
+
+        if (noteToUpdate.isEmpty()) {
+            System.out.println("Note not found!");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        NoteModel note = noteToUpdate.get();
+        System.out.println("\nCurrent Note Information:");
+        System.out.println(note);
+
+        System.out.print("\nEnter new title (press Enter to keep current): ");
+        String newTitle = scanner.nextLine();
+        if (newTitle.isEmpty()) {
+            newTitle = note.title;
+        }
+
+        System.out.println("Enter new content (press Enter to keep current):");
+        String newContent = scanner.nextLine();
+        if (newContent.isEmpty()) {
+            newContent = note.content;
+        }
+
+        try {
+            NoteModel updatedNote = noteService.updateNote(noteId, newTitle, newContent);
+            System.out.println("\nNote updated successfully!");
+            System.out.println(updatedNote);
+        } catch (IOException e) {
+            System.out.println("Error updating note: " + e.getMessage());
+        }
+
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
     }
 
     private static void createNote() {

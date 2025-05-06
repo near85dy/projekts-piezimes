@@ -127,4 +127,31 @@ public class UserService implements IService {
                 .average()
                 .orElse(0);
     }
+
+    public UserModel updateUserProfile(String name, String surname, String password, int age) throws IOException {
+        if (!isLoggedIn()) {
+            return null;
+        }
+
+        currentUser.name = name;
+        currentUser.surname = surname;
+        currentUser.password = password;
+        currentUser.age = age;
+
+        // Update the user in the database
+        List<String[]> allUsers = database.loadDatabase();
+        for (int i = 1; i < allUsers.size(); i++) {
+            String[] userData = allUsers.get(i);
+            if (Integer.parseInt(userData[0]) == currentUser.id) {
+                userData[2] = name;
+                userData[3] = surname;
+                userData[4] = password;
+                userData[5] = String.valueOf(age);
+                break;
+            }
+        }
+        database.saveDatabase();
+
+        return currentUser;
+    }
 }
